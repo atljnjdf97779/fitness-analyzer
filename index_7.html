@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Анализ точки — женская фитнес-студия</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0a0b;--bg2:#111114;--bg3:#18181d;
+    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+    --text:#f0eeea;--muted:#7a7880;
+    --accent:#c8f56a;--accent2:#1afe9a;
+    --danger:#ff5f5f;--warn:#ffb347;--blue:#5b9cf6;--pink:#f06292;
+    --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+    --r:10px;--r2:16px;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px}
+  #root{min-height:100vh;display:flex;flex-direction:column}
+
+  /* HERO */
+  .hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1.5rem 4rem;text-align:center}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem}
+  .hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:600;line-height:1.1;max-width:640px;margin-bottom:.8rem;letter-spacing:-.02em}
+  .hero h1 span{color:var(--accent)}
+  .hero>p{color:var(--muted);font-size:.95rem;max-width:460px;margin-bottom:2.5rem;line-height:1.6}
+
+  .search-wrap{width:100%;max-width:640px}
+  .search-box{display:flex;align-items:center;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.5rem .5rem .5rem 1.25rem;gap:.75rem;transition:border-color .2s}
+  .search-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,245,106,.08)}
+  .pin-icon{flex-shrink:0;width:20px;height:20px;color:var(--muted)}
+  .search-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:.95rem;min-width:0}
+  .search-input::placeholder{color:var(--muted)}
+  .btn-analyze{flex-shrink:0;background:var(--accent);color:#0a0a0b;border:none;border-radius:10px;padding:.65rem 1.4rem;font-family:var(--font);font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .btn-analyze:hover{background:#d8ff7a;transform:translateY(-1px)}
+  .btn-analyze:active{transform:scale(.97)}
+  .btn-analyze:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .hint{font-size:.78rem;color:var(--muted);margin-top:.8rem;font-family:var(--mono)}
+
+  .currency-toggle{display:flex;gap:0;margin-top:.75rem;border:1px solid var(--border2);border-radius:8px;overflow:hidden;width:fit-content}
+  .currency-btn{background:transparent;border:none;padding:.45rem .9rem;font-family:var(--mono);font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .15s}
+  .currency-btn.active{background:var(--accent);color:#0a0a0b;font-weight:600}
+  .error-box{width:100%;max-width:640px;margin-top:1rem;padding:.8rem 1rem;background:rgba(255,95,95,.08);border:1px solid rgba(255,95,95,.25);border-radius:var(--r);font-size:.85rem;color:var(--danger);line-height:1.5}
+  .hidden{display:none!important}
+
+  /* LOADER */
+  .loader-wrap{display:flex;flex-direction:column;align-items:center;gap:1.5rem;padding:3rem 1.5rem}
+  .spinner{width:36px;height:36px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loader-steps{display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-family:var(--mono);color:var(--muted);width:320px}
+  .step{display:flex;align-items:center;gap:8px;transition:color .3s;padding:3px 0}
+  .step::before{content:'○';font-size:10px;flex-shrink:0}
+  .step.done{color:var(--accent2)}.step.done::before{content:'●'}
+  .step.active{color:var(--accent)}.step.active::before{content:'◉'}
+
+  /* RESULTS */
+  .results{max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem;width:100%}
+  .results-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+  .results-header h2{font-size:1.1rem;font-weight:500}
+  .results-header p{font-size:.82rem;color:var(--muted);font-family:var(--mono);margin-top:4px}
+  .btn-reset{background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--muted);padding:.5rem 1rem;font-family:var(--font);font-size:.82rem;cursor:pointer;transition:all .15s}
+  .btn-reset:hover{border-color:var(--text);color:var(--text)}
+
+  /* SCORE BANNER */
+  .score-banner{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem 2rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem;position:relative;overflow:hidden}
+  .score-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px 99px 0 0}
+  .score-ring{flex-shrink:0;position:relative;width:90px;height:90px}
+  .score-ring svg{width:90px;height:90px;transform:rotate(-90deg)}
+  .s-track{stroke:var(--border2);fill:none;stroke-width:5}
+  .s-fill{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+  .score-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-ring-label .num{font-size:1.6rem;font-weight:600;line-height:1}
+  .score-ring-label .sub{font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-top:2px}
+  .score-details{flex:1;min-width:200px}
+  .score-details h3{font-size:1.3rem;font-weight:600;margin-bottom:6px}
+  .score-details p{font-size:.88rem;color:var(--muted);line-height:1.55;max-width:420px}
+
+  /* SECTION LABEL */
+  .section-label{font-size:.72rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* KPI GRID */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.75rem;margin-bottom:1.5rem}
+  .kpi-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;display:flex;flex-direction:column;gap:5px}
+  .kpi-label{font-size:.7rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
+  .kpi-value{font-size:1.45rem;font-weight:600;line-height:1.1;color:var(--text)}
+  .kpi-value.accent{color:var(--accent)}.kpi-value.warn{color:var(--warn)}.kpi-value.danger{color:var(--danger)}.kpi-value.blue{color:var(--blue)}.kpi-value.pink{color:var(--pink)}
+  .kpi-sub{font-size:.76rem;color:var(--muted)}
+
+  /* THREE COL */
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+  @media(max-width:700px){.three-col,.two-col{grid-template-columns:1fr}}
+
+  /* GENERIC CARD */
+  .panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
+
+  /* BARS */
+  .bar-row{display:flex;flex-direction:column;gap:5px;margin-bottom:.85rem}
+  .bar-row:last-child{margin-bottom:0}
+  .bar-meta{display:flex;justify-content:space-between;font-size:.8rem}
+  .bar-meta .name{color:var(--text)}.bar-meta .val{color:var(--muted);font-family:var(--mono)}
+  .bar-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+  /* LOCATION FACTORS */
+  .factor-grid{display:flex;flex-direction:column;gap:.55rem}
+  .factor-row{display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+  .factor-icon{font-size:16px;flex-shrink:0;width:22px;text-align:center}
+  .factor-info{flex:1;min-width:0}
+  .factor-name{font-size:.82rem;font-weight:500}
+  .factor-detail{font-size:.74rem;color:var(--muted);font-family:var(--mono);margin-top:2px}
+  .factor-badge{font-size:.72rem;font-family:var(--mono);padding:3px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0}
+  .badge-green{background:rgba(26,254,154,.1);color:var(--accent2);border:1px solid rgba(26,254,154,.25)}
+  .badge-amber{background:rgba(255,179,71,.1);color:var(--warn);border:1px solid rgba(255,179,71,.25)}
+  .badge-red{background:rgba(255,95,95,.1);color:var(--danger);border:1px solid rgba(255,95,95,.25)}
+  .badge-muted{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
+
+  /* FINANCE */
+  .fi-item{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.88rem}
+  .fi-item:last-child{border-bottom:none}
+  .fi-label{color:var(--muted)}.fi-val{font-family:var(--mono);font-size:.9rem;font-weight:500}
+  .fi-val.positive{color:var(--accent2)}.fi-val.neutral{color:var(--text)}.fi-val.warn{color:var(--warn)}
+  .fi-divider{height:1px;background:var(--border2);margin:.3rem 0}
+
+  /* COMPETITORS */
+  .competitor-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem}
+  .comp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1.1rem;display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;transition:border-color .15s}
+  .comp-card:hover{border-color:var(--border2)}
+  .comp-rank{font-family:var(--mono);font-size:.7rem;color:var(--muted);min-width:20px;flex-shrink:0}
+  .comp-info{flex:1;min-width:140px;display:flex;flex-direction:column;gap:2px}
+  .comp-name{font-size:.88rem;font-weight:500}
+  .comp-type{font-size:.73rem;color:var(--muted);font-family:var(--mono)}
+  .comp-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .comp-stars{font-size:.82rem;color:var(--warn);font-family:var(--mono)}
+  .comp-reviews{font-size:.73rem;color:var(--muted);font-family:var(--mono)}
+  .comp-dist{font-size:.73rem;font-family:var(--mono)}
+  .comp-dist.near{color:var(--danger)}.comp-dist.mid{color:var(--warn)}.comp-dist.far{color:var(--muted)}
+
+  /* THREAT BADGE on competitor */
+  .comp-threat{font-size:.68rem;font-family:var(--mono);padding:2px 7px;border-radius:99px;margin-top:2px}
+
+  /* AI CARD */
+  .ai-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1.5rem}
+  .ai-badge{font-family:var(--mono);font-size:.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.85rem;display:flex;align-items:center;gap:6px}
+  .ai-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .ai-points{display:flex;flex-direction:column;gap:.55rem}
+  .ai-point{display:flex;align-items:flex-start;gap:8px;font-size:.88rem;color:var(--text);line-height:1.6}
+  .ai-point::before{content:'→';color:var(--accent);font-family:var(--mono);flex-shrink:0;margin-top:1px}
+
+  /* TAGS */
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tag{font-size:.72rem;font-family:var(--mono);padding:3px 10px;border-radius:99px;border:1px solid var(--border);color:var(--muted)}
+  .tag.green{border-color:rgba(26,254,154,.3);color:var(--accent2)}
+  .tag.amber{border-color:rgba(255,179,71,.3);color:var(--warn)}
+  .tag.red{border-color:rgba(255,95,95,.3);color:var(--danger)}
+  .tag.pink{border-color:rgba(240,98,146,.3);color:var(--pink)}
+
+  /* VERDICT BLOCK */
+  .verdict{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1.5rem;display:flex;gap:1.25rem;align-items:flex-start;flex-wrap:wrap}
+  .verdict-icon{font-size:2rem;flex-shrink:0;margin-top:2px}
+  .verdict-text h4{font-size:1rem;font-weight:600;margin-bottom:6px}
+  .verdict-text p{font-size:.87rem;color:var(--muted);line-height:1.6}
+
+  .footer{border-top:1px solid var(--border);padding:1rem 1.5rem;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+  .footer span{font-size:.75rem;color:var(--muted);font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div id="root">
+
+  <!-- HERO -->
+  <div id="heroSection" class="hero">
+    <p class="eyebrow">📍 анализ локации · женская фитнес-студия</p>
+    <h1>Найти лучшую точку для <span>открытия</span></h1>
+    <p>Введите адрес — система проверит конкурентов, трафик и потенциал района через 2ГИС.</p>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg class="pin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C8.69 2 6 4.69 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.31-2.69-6-6-6z"/>
+          <circle cx="12" cy="8" r="2.5"/>
+        </svg>
+        <input id="addressInput" class="search-input" type="text"
+          placeholder="Например: проспект Абая 150, Алматы"/>
+        <button id="btnAnalyze" class="btn-analyze" onclick="startAnalysis()">Анализировать</button>
+      </div>
+      <p class="hint">Алматы, Москва, Минск, Бишкек — любой город СНГ</p>
+    <div class="currency-toggle">
+      <button class="currency-btn active" onclick="setCurrency('KZT',this)">₸ Тенге</button>
+      <button class="currency-btn" onclick="setCurrency('RUB',this)">₽ Рубли</button>
+    </div>
+    </div>
+
+    <div id="errorBox" class="error-box hidden"></div>
+  </div>
+
+  <!-- LOADER -->
+  <div id="loaderSection" class="hero hidden">
+    <div class="loader-wrap">
+      <div class="spinner"></div>
+      <div class="loader-steps">
+        <div class="step" id="step1">Геокодирование адреса</div>
+        <div class="step" id="step2">Поиск конкурентов по фитнесу</div>
+        <div class="step" id="step3">Анализ инфраструктуры района</div>
+        <div class="step" id="step4">Расчёт метрик и финансов</div>
+        <div class="step" id="step5">AI-резюме</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsSection" class="results hidden">
+    <div class="results-header">
+      <div>
+        <h2 id="resultTitle">Анализ локации</h2>
+        <p id="resultAddr"></p>
+      </div>
+      <button class="btn-reset" onclick="resetApp()">← Новый адрес</button>
+    </div>
+
+    <!-- Verdict -->
+    <div id="verdictBlock" class="verdict"></div>
+
+    <!-- Score + tags -->
+    <div class="score-banner">
+      <div class="score-ring">
+        <svg viewBox="0 0 90 90">
+          <circle class="s-track" cx="45" cy="45" r="38"/>
+          <circle class="s-fill" id="scoreArc" cx="45" cy="45" r="38"
+            stroke="#c8f56a" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+        </svg>
+        <div class="score-ring-label">
+          <span class="num" id="scoreNum">—</span>
+          <span class="sub">/ 100</span>
+        </div>
+      </div>
+      <div class="score-details">
+        <h3 id="scoreLabel"></h3>
+        <p id="scoreDesc"></p>
+        <div class="tags" id="scoreTags"></div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <p class="section-label">Ключевые метрики</p>
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Location factors + Scores -->
+    <div class="two-col">
+      <div>
+        <p class="section-label">Факторы локации</p>
+        <div class="factor-grid" id="factorGrid"></div>
+      </div>
+      <div>
+        <p class="section-label">Оценки</p>
+        <div class="panel" id="competitionBars"></div>
+      </div>
+    </div>
+
+    <!-- Finance -->
+    <p class="section-label">Финансовый прогноз · средний сегмент</p>
+    <div class="two-col">
+      <div class="panel" id="financeBlock"></div>
+      <div class="panel" id="scenarioBlock"></div>
+    </div>
+
+    <!-- AI -->
+    <p class="section-label">AI-резюме</p>
+    <div class="ai-card">
+      <div class="ai-badge">AI-анализ · женская фитнес-студия</div>
+      <div id="aiSummary">
+        <div class="ai-points"><div class="ai-point" style="color:var(--muted)">AI-резюме недоступно — OpenAI ключ не указан в коде.</div></div>
+      </div>
+    </div>
+
+    <!-- Competitors -->
+    <p class="section-label" id="compLabel">Конкуренты в радиусе</p>
+    <div class="competitor-list" id="competitorList"></div>
+  </div>
+
+  <div class="footer">
+    <span>📍 женская фитнес-студия · анализ локации</span>
+    <span>данные: 2ГИС</span>
+    <span>КЗ · РФ · БЕЛ · КГ</span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// КОНФИГ — настройте под себя
+// ═══════════════════════════════════════════════════════════
+const TWOGIS_KEY = 'f750fad1-d911-4d8f-86ec-c6a711f00590';
+const OPENAI_KEY = ''; // вставьте OpenAI ключ сюда для AI-резюме
+
+// Валюта — переключается кнопкой
+const CURRENCIES = {
+  KZT: { symbol:'₸', avgMembership:25000, fixedCosts:800000, investment:12000000, name:'тг' },
+  RUB: { symbol:'₽', avgMembership:4500,  fixedCosts:150000, investment:2500000,  name:'руб' },
+};
+let CURR = CURRENCIES.KZT;
+
+function setCurrency(code, btn) {
+  CURR = CURRENCIES[code];
+  document.querySelectorAll('.currency-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function fmtMoney(n){ return new Intl.NumberFormat('ru-RU').format(Math.round(n))+' '+CURR.symbol; }
+
+const C = {
+  SEARCH_RADIUS_M: 5000,
+
+  // Ключевые слова для поиска конкурентов — женский фитнес, Алматы
+  // Ищем по словам, не рубрикам — надёжнее и покрывает больше
+  SEARCH_KEYWORDS: [
+    'фитнес студия',
+    'женский фитнес',
+    'фитнес клуб',
+    'йога студия',
+    'пилатес',
+    'групповые тренировки',
+    'тренажерный зал',
+    'танцевальная студия',
+    'растяжка студия',
+  ],
+
+  // Финансы — средний сегмент Алматы, женская студия
+  get AVG_MEMBERSHIP_KZT(){ return CURR.avgMembership; },
+  TARGET_MEMBERS_BASE: 150,    // ёмкость при нулевой конкуренции (групповой формат)
+  CLASSES_PER_DAY: 8,          // кол-во тренировок в день (9:00–21:00, каждый час)
+  MAX_PER_CLASS: 15,            // макс. человек на групповой
+  get FIXED_COSTS_KZT(){ return CURR.fixedCosts; },
+  VARIABLE_COST_PCT: 0.20,     // доля переменных от выручки
+  get INVESTMENT_KZT(){ return CURR.investment; },
+};
+
+// ═══════════════════════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+function setStep(n){ for(let i=1;i<=5;i++){ const el=$('step'+i); el.classList.remove('done','active'); if(i<n)el.classList.add('done'); if(i===n)el.classList.add('active'); } }
+function showError(msg){ const b=$('errorBox'); b.textContent=msg; b.classList.remove('hidden'); }
+function clearError(){ $('errorBox').classList.add('hidden'); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function fmt(n){ return new Intl.NumberFormat('ru-RU').format(Math.round(n)); }
+function fmtKZT(n){ return fmtMoney(n); }
+
+// ═══════════════════════════════════════════════════════════
+// GEOCODER — 2ГИС
+// ═══════════════════════════════════════════════════════════
+async function geocode(address) {
+  const _u = `https://catalog.api.2gis.com/3.0/items/geocode?q=${encodeURIComponent(address)}&fields=items.point,items.full_name&key=${TWOGIS_KEY}`;
+  const url = `https://corsproxy.io/?${encodeURIComponent(_u)}`;
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error(`2ГИС Geocoder HTTP ${resp.status} — проверьте ключ`);
+  const data = await resp.json();
+  const items = data.result?.items;
+  if(!items?.length) throw new Error('Адрес не найден. Попробуйте добавить город, например «улица Абая 10, Алматы»');
+  const item = items[0];
+  if(!item.point) throw new Error('2ГИС не вернул координаты для этого адреса');
+  return { lat: item.point.lat, lng: item.point.lon, address: item.full_name || address };
+}
+
+// ═══════════════════════════════════════════════════════════
+// PLACES SEARCH — 2ГИС по ключевым словам
+// Каждый запрос = отдельное слово → объединяем и дедуплицируем
+// ═══════════════════════════════════════════════════════════
+async function fetchCompetitors(lat, lng) {
+  const seen = new Set();
+  const results = [];
+
+  for(const kw of C.SEARCH_KEYWORDS){
+    const _raw = [
+      'https://catalog.api.2gis.com/3.0/items',
+      `?q=${encodeURIComponent(kw)}`,
+      `&point=${lng},${lat}`,
+      `&radius=${C.SEARCH_RADIUS_M}`,
+      `&fields=items.point,items.reviews,items.rating,items.rubrics,items.address,items.name`,
+      `&page_size=20`,
+      `&sort=distance`,
+      `&type=branch`,
+      `&key=${TWOGIS_KEY}`,
+    ].join('');
+    const url = `https://corsproxy.io/?${encodeURIComponent(_raw)}`;
+
+    try {
+      const resp = await fetch(url);
+      if(!resp.ok){
+        if(resp.status===403) throw new Error('2ГИС API доступ запрещён (403) — ключ недействителен или лимит исчерпан');
+        await sleep(300);
+        continue;
+      }
+      const data = await resp.json();
+
+      for(const item of (data.result?.items || [])){
+        if(!item.id || seen.has(item.id)) continue;
+        seen.add(item.id);
+
+        const rating     = item.reviews?.general_rating ? +item.reviews.general_rating : null;
+        const reviewCnt  = item.reviews?.rating_count   || 0;
+        const rubrics    = (item.rubrics||[]).map(r=>r.name).filter(Boolean);
+        const dist       = item.point
+          ? Math.round(haversine(lat,lng,item.point.lat,item.point.lon))
+          : null;
+
+        results.push({
+          id:       item.id,
+          name:     item.name || '—',
+          rating,
+          reviews:  reviewCnt,
+          rubrics,
+          address:  item.address_name || item.address?.name || '—',
+          distance: dist,
+        });
+      }
+    } catch(e){
+      if(e.message.includes('403')) throw e;
+      // остальные ошибки — пропускаем и идём дальше
+    }
+
+    await sleep(150);
+  }
+
+  // Убираем нерелевантные (банки, магазины и т.п.) — оставляем только фитнес/здоровье
+  const FITNESS_KEYWORDS = ['фитнес','спорт','йога','пилатес','тренаж','студия','танц','растяжк','boxing','crossfit','кросфит','wellness','бассейн','зал','gym','боевые','единоборств','бокс','кикбоксинг','самооборон'];
+  const filtered = results.filter(r => {
+    const haystack = (r.name + ' ' + r.rubrics.join(' ')).toLowerCase();
+    return FITNESS_KEYWORDS.some(kw => haystack.includes(kw));
+  });
+
+  return (filtered.length > 0 ? filtered : results)
+    .filter(r => r.distance !== null)
+    .sort((a,b) => a.distance - b.distance)
+    .slice(0, 25);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ИНФРАСТРУКТУРА — 2ГИС API (работает на хостинге)
+// ═══════════════════════════════════════════════════════════
+async function fetchInfrastructure(lat, lng) {
+  const infra = {
+    residentialBuildings: 0,
+    busStops: 0,
+    stopRoutes: 0,
+    parking: 0,
+    schools: 0,
+    kindergartens: 0,
+    supermarkets: 0,
+    cafes: 0,
+    offices: 0,
+    malls: 0,
+  };
+
+  const R = 5000;
+  const seen = {};
+  const add = (key, items) => {
+    if(!seen[key]) seen[key] = new Set();
+    (items||[]).forEach(it => seen[key].add(it.id));
+    infra[key] = seen[key].size;
+  };
+
+  const req = async (q, radius, useType) => {
+    const typeParam = useType ? '&type=branch' : '';
+    const _raw = `https://catalog.api.2gis.com/3.0/items?q=${encodeURIComponent(q)}&point=${lng},${lat}&radius=${radius}&page_size=50${typeParam}&fields=items.id,items.name&key=${TWOGIS_KEY}`;
+    const url = `https://corsproxy.io/?${encodeURIComponent(_raw)}`;
+    try {
+      const r = await fetch(url);
+      if(!r.ok) return [];
+      const d = await r.json();
+      return d.result?.items || [];
+    } catch(e){ return []; }
+  };
+
+  const queries = [
+    // Жилые дома
+    async () => add('residentialBuildings', await req('жилой дом', R, false)),
+    async () => add('residentialBuildings', await req('жилой комплекс', R, false)),
+    async () => add('residentialBuildings', await req('многоквартирный дом', R, false)),
+    // Остановки
+    async () => add('busStops', await req('автобусная остановка', R, false)),
+    async () => add('busStops', await req('остановка', R, false)),
+    async () => add('stopRoutes', await req('автобусный маршрут', R, false)),
+    async () => add('stopRoutes', await req('троллейбус', R, false)),
+    async () => add('stopRoutes', await req('трамвай', R, false)),
+    // Парковки
+    async () => add('parking', await req('парковка', R, false)),
+    // Образование
+    async () => add('schools', await req('школа', R, true)),
+    async () => add('kindergartens', await req('детский сад', R, true)),
+    // Магазины / трафик
+    async () => add('supermarkets', await req('супермаркет', R, true)),
+    async () => add('malls', await req('торговый центр', R, true)),
+    async () => add('cafes', await req('кафе', R, true)),
+    async () => add('cafes', await req('ресторан', R, true)),
+    // Офисы
+    async () => add('offices', await req('бизнес центр', R, true)),
+    async () => add('offices', await req('офисный центр', R, true)),
+  ];
+
+  // Запускаем пакетами по 3 чтобы не превысить лимит
+  for(let i = 0; i < queries.length; i += 3){
+    await Promise.all(queries.slice(i, i+3).map(fn => fn()));
+    await sleep(200);
+  }
+
+  return infra;
+}
+
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCORING
+// ═══════════════════════════════════════════════════════════
+function computeScores(competitors, infra) {
+  const n = competitors.length;
+  const rated = competitors.filter(c => c.rating > 0);
+  const avgRating   = rated.length ? +(rated.reduce((s,c)=>s+c.rating,0)/rated.length).toFixed(1) : 0;
+  const avgReviews  = rated.length ? Math.round(rated.reduce((s,c)=>s+c.reviews,0)/rated.length) : 0;
+
+  // --- Конкуренция ---
+  const competitionRaw  = Math.round(Math.min(n/12,1)*100);
+  const saturation      = Math.round(Math.min(n/8,1)*100);
+  const qualityPressure = avgRating ? Math.round(Math.max(0,(avgRating-3)/2*100)) : 0;
+
+  // Прямые конкуренты (женский/групповой формат)
+  const DIRECT_KW = ['женск','ladies','girls','пилатес','йога','растяжк','стретч','танц','групп'];
+  const directCount = competitors.filter(c => {
+    const h = (c.name+' '+c.rubrics.join(' ')).toLowerCase();
+    return DIRECT_KW.some(k=>h.includes(k));
+  }).length;
+
+  // --- Инфраструктура (0-100) ---
+  const residentialScore = Math.min(infra.residentialBuildings/20,1)*100;
+  const transportScore   = Math.min(infra.busStops/6,1)*100;
+  const routeScore       = Math.min(infra.stopRoutes/8,1)*100;
+  const parkingScore     = Math.min(infra.parking/5,1)*100;
+  const activityScore    = Math.min((infra.cafes+infra.supermarkets+infra.malls*3)/15,1)*100;
+  const audienceScore    = Math.min((infra.schools+infra.kindergartens+infra.offices)/10,1)*100;
+
+  // Взвешенный инфра-скор для женской студии
+  // Жилые дома важнее всего — это ЦА рядом с домом
+  const infraScore = Math.round(
+    residentialScore * 0.35 +
+    transportScore   * 0.20 +
+    routeScore       * 0.10 +
+    parkingScore     * 0.15 +
+    activityScore    * 0.10 +
+    audienceScore    * 0.10
+  );
+
+  // --- Потенциал рынка ---
+  const opportunity = Math.round(Math.max(0, Math.min(100,
+    100
+    - competitionRaw * 0.45
+    - qualityPressure * 0.25
+    - (directCount/Math.max(n,1)) * 30
+  )));
+
+  // --- Potential (итоговый) ---
+  // Взвешиваем: opportunity 40%, инфраструктура 35%, анти-насыщенность 25%
+  const potential = Math.round(
+    opportunity     * 0.40 +
+    infraScore      * 0.35 +
+    (100-saturation)* 0.25
+  );
+
+  // --- Вердикт ---
+  let verdict, verdictIcon, verdictColor;
+  if(potential >= 72)      { verdict='Сильная локация'; verdictIcon='✅'; verdictColor='accent'; }
+  else if(potential >= 55) { verdict='Хорошая локация с оговорками'; verdictIcon='⚠️'; verdictColor='warn'; }
+  else if(potential >= 38) { verdict='Рискованная локация'; verdictIcon='🔶'; verdictColor='warn'; }
+  else                     { verdict='Сложная локация'; verdictIcon='❌'; verdictColor='danger'; }
+
+  let marketLabel, marketDesc;
+  if(n===0)     { marketLabel='Конкурентов нет';           marketDesc='Район не освоен — первый игрок получает всю аудиторию'; }
+  else if(n<3)  { marketLabel='Низкая конкуренция';        marketDesc='Единичные игроки — пространство для роста есть'; }
+  else if(n<6)  { marketLabel='Умеренная конкуренция';     marketDesc='Конкуренты присутствуют, но рынок не насыщен'; }
+  else if(n<10) { marketLabel='Высокая конкуренция';       marketDesc='Насыщенный рынок — нужно чёткое УТП и дифференциация'; }
+  else           { marketLabel='Очень высокая конкуренция'; marketDesc='Перегретый рынок — ниша и уникальный формат обязательны'; }
+
+  const tags = [];
+  if(n===0)                         tags.push({label:'Нет конкурентов',cls:'green'});
+  else if(directCount===0&&n>0)     tags.push({label:'Нет прямых конкурентов',cls:'green'});
+  else if(directCount>0)            tags.push({label:`${directCount} прямых конкурента`,cls:'red'});
+  if(avgRating>4.3&&n>0)            tags.push({label:'Сильные конкуренты',cls:'amber'});
+  if(avgRating>0&&avgRating<3.8)    tags.push({label:'Слабые рейтинги рынка',cls:'green'});
+  if(infraScore>65)                 tags.push({label:'Хорошая инфраструктура',cls:'green'});
+  if(infra.residentialBuildings>10) tags.push({label:'Жилой район ✓',cls:'green'});
+  if(infra.busStops>=3)             tags.push({label:'Хороший транспорт',cls:'green'});
+  if(infra.stopRoutes>=5)           tags.push({label:`${infra.stopRoutes} маршрутов рядом`,cls:'green'});
+  if(infra.kindergartens+infra.schools>=3) tags.push({label:'Семейный район',cls:'green'});
+  if(infra.offices>=3)              tags.push({label:'Офисная аудитория',cls:'amber'});
+  if(infra.parking<2)               tags.push({label:'Мало парковок',cls:'amber'});
+
+  return {
+    n, directCount, avgRating, avgReviews,
+    competitionRaw, saturation, qualityPressure,
+    opportunity, potential, infraScore,
+    residentialScore:Math.round(residentialScore),
+    transportScore:Math.round(transportScore),
+    routeScore:Math.round(routeScore),
+    audienceScore:Math.round(audienceScore),
+    parkingScore:Math.round(parkingScore),
+    marketLabel, marketDesc, tags,
+    verdict, verdictIcon, verdictColor,
+    infra,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// FINANCE — тенге, средний сегмент, групповой формат
+// ═══════════════════════════════════════════════════════════
+function computeFinance(scores) {
+  const {n, opportunity} = scores;
+
+  // Клиентская база уменьшается с конкуренцией
+  const compFactor = Math.max(0.35, 1-(n/18));
+  const oppFactor  = opportunity/100;
+  const members    = Math.round(C.TARGET_MEMBERS_BASE * compFactor * (0.65+oppFactor*0.35));
+
+  const revenue    = members * C.AVG_MEMBERSHIP_KZT;
+  const varCosts   = Math.round(revenue * C.VARIABLE_COST_PCT);
+  const totalCosts = C.FIXED_COSTS_KZT + varCosts;
+  const profit     = revenue - totalCosts;
+  const margin     = revenue > 0 ? Math.round((profit/revenue)*100) : 0;
+  const payback    = profit > 0 ? +(C.INVESTMENT_KZT/profit/12).toFixed(1) : null;
+
+  // Загрузка зала (сколько % мест занято)
+  const totalSlots  = C.CLASSES_PER_DAY * C.MAX_PER_CLASS * 30; // мест в месяц
+  const fillRate    = Math.round((members / totalSlots) * 100);
+
+  // Сценарии
+  const pessimistic = Math.round(members * 0.65);
+  const optimistic  = Math.round(members * 1.35);
+
+  return {
+    members, revenue, varCosts, totalCosts, profit, margin, payback,
+    fillRate: Math.min(fillRate, 100),
+    pessimistic, optimistic,
+    revenuePess: pessimistic * C.AVG_MEMBERSHIP_KZT,
+    revenueOpt:  optimistic  * C.AVG_MEMBERSHIP_KZT,
+    profitPess:  pessimistic * C.AVG_MEMBERSHIP_KZT - totalCosts,
+    profitOpt:   optimistic  * C.AVG_MEMBERSHIP_KZT - totalCosts,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPENAI
+// ═══════════════════════════════════════════════════════════
+async function fetchAISummary(address, scores, finance, competitors) {
+  if(!OPENAI_KEY) return null;
+
+  const topComps = competitors.slice(0,6).map(c=>
+    `${c.name} (${c.rating?c.rating+'★':'нет рейт.'}, ${c.reviews} отз., ${c.distance}м, рубрики: ${c.rubrics.slice(0,2).join('/')||'—'})`
+  ).join('\n');
+
+  const prompt=`Ты — эксперт по открытию женских фитнес-студий в Казахстане (групповые тренировки, средний сегмент, 15–35 тыс тг/мес).
+
+РЕАЛЬНЫЕ ДАННЫЕ ЛОКАЦИИ (источник: 2ГИС):
+Адрес: ${address}
+Конкурентов найдено: ${scores.n} (из них прямых женских/групповых: ${scores.directCount})
+Средний рейтинг конкурентов: ${scores.avgRating||'нет данных'}
+Конкуренция: ${scores.competitionRaw}/100 | Насыщенность: ${scores.saturation}/100
+Инфраструктура района: ${scores.infraScore}/100
+Жилых домов рядом (до 800м): ${scores.infra.residentialBuildings}
+Остановок транспорта (до 1км): ${scores.infra.busStops} · Маршрутов: ${scores.infra.stopRoutes}
+Парковок (до 400м): ${scores.infra.parking}
+Потенциал рынка Score: ${scores.opportunity}/100
+Итоговый балл: ${scores.potential}/100
+Прогноз членов/мес: ${finance.members} | Выручка: ${fmtKZT(finance.revenue)} | Прибыль: ${fmtKZT(finance.profit)}
+
+Конкуренты:
+${topComps||'не найдено'}
+
+Дай ровно 5 выводов специфично для женской фитнес-студии. Используй ТОЛЬКО данные выше. Каждый вывод — одно предложение с новой строки. Без нумерации.`;
+
+  const resp = await fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${OPENAI_KEY}`},
+    body:JSON.stringify({model:'gpt-4o-mini',max_tokens:500,messages:[{role:'user',content:prompt}]}),
+  });
+  const data = await resp.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.choices[0].message.content.trim();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function render(address, competitors, scores, finance, aiText) {
+  $('resultTitle').textContent = address.length>70 ? address.slice(0,67)+'…' : address;
+  $('resultAddr').textContent  = `${scores.n} конкурентов · ${scores.directCount} прямых · радиус ${C.SEARCH_RADIUS_M/1000} км · 2ГИС`;
+
+  // VERDICT
+  const verdictDescs = {
+    accent: 'Район хорошо подходит для открытия женской студии — инфраструктура и конкуренция благоприятны.',
+    warn:   'Локация рабочая, но есть факторы риска — рекомендуется дополнительная проверка.',
+    danger: 'Высокая конкуренция или слабая инфраструктура — рекомендуется рассмотреть альтернативы.',
+  };
+  $('verdictBlock').innerHTML = `
+    <div class="verdict-icon">${scores.verdictIcon}</div>
+    <div class="verdict-text">
+      <h4>${scores.verdict}</h4>
+      <p>${verdictDescs[scores.verdictColor]||''}</p>
+    </div>`;
+
+  // SCORE RING
+  const arc = $('scoreArc');
+  setTimeout(()=>{ arc.style.strokeDashoffset = 238.76-(scores.potential/100)*238.76; },80);
+  const col = scores.potential>=70?'#c8f56a':scores.potential>=50?'#ffb347':'#ff5f5f';
+  arc.setAttribute('stroke',col);
+  $('scoreNum').textContent = scores.potential;
+  $('scoreNum').style.color = col;
+  $('scoreLabel').textContent = scores.marketLabel;
+  $('scoreDesc').textContent  = scores.marketDesc;
+  $('scoreTags').innerHTML    = scores.tags.map(t=>`<span class="tag ${t.cls}">${t.label}</span>`).join('');
+
+  // KPIs
+  $('kpiGrid').innerHTML = [
+    {label:'Конкурентов всего',   value:scores.n,              sub:`в радиусе 5 км`,       cls:scores.n>8?'danger':scores.n>4?'warn':'accent'},
+    {label:'Прямых конкурентов',  value:scores.directCount,    sub:'женских / групповых форматов',                    cls:scores.directCount>3?'danger':scores.directCount>1?'warn':'accent'},
+    {label:'Потенциал рынка',         value:scores.opportunity+'%',sub:'потенциал рынка',                        cls:scores.opportunity>=65?'accent':scores.opportunity>=40?'warn':'danger'},
+    {label:'Инфраструктура',      value:scores.infraScore+'%', sub:`${scores.infra.residentialBuildings} домов · ${scores.infra.busStops} ост. · ${scores.infra.stopRoutes} марш.`, cls:scores.infraScore>=60?'accent':scores.infraScore>=35?'warn':'danger'},
+    {label:'Выручка / мес',       value:fmtKZT(finance.revenue),sub:`${finance.members} членов`,             cls:'blue'},
+    {label:'Прибыль / мес',       value:fmtKZT(finance.profit), sub:`маржа ${finance.margin}%`,              cls:finance.profit>0?'accent':'danger'},
+  ].map(k=>`
+    <div class="kpi-card">
+      <span class="kpi-label">${k.label}</span>
+      <span class="kpi-value ${k.cls}">${k.value}</span>
+      <span class="kpi-sub">${k.sub}</span>
+    </div>`).join('');
+
+  // LOCATION FACTORS
+  const {infra} = scores;
+  const noData = (v) => v===0 ? {text:'нет данных',cls:'badge-muted'} : null;
+  const factors = [
+    {
+      icon:'🏠', name:'Жилая застройка (ЦА рядом)',
+      detail: infra.residentialBuildings>0
+        ? `${infra.residentialBuildings} жилых объектов в радиусе 5 км`
+        : 'нет данных OSM',
+      badge: infra.residentialBuildings>=15?{text:'Плотный район',cls:'badge-green'}:infra.residentialBuildings>=6?{text:'Есть застройка',cls:'badge-amber'}:infra.residentialBuildings>0?{text:'Мало домов',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
+    },
+    {
+      icon:'🚌', name:'Остановки транспорта',
+      detail: infra.busStops>0
+        ? `${infra.busStops} остановок · ${infra.stopRoutes} маршрутов в радиусе 5 км`
+        : 'нет данных OSM',
+      badge: infra.busStops>=4?{text:'Хорошая доступность',cls:'badge-green'}:infra.busStops>=2?{text:'Есть транспорт',cls:'badge-amber'}:infra.busStops>0?{text:'Мало остановок',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
+    },
+    {
+      icon:'🅿️', name:'Парковка',
+      detail: infra.parking>0 ? `${infra.parking} парковок в радиусе 5 км` : 'нет данных OSM',
+      badge: infra.parking>=4?{text:'Хорошо',cls:'badge-green'}:infra.parking>=2?{text:'Есть',cls:'badge-amber'}:infra.parking>0?{text:'Мало',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
+    },
+    {
+      icon:'🏫', name:'Школы и детсады (семейная ЦА)',
+      detail: (infra.schools+infra.kindergartens)>0
+        ? `${infra.schools} школ · ${infra.kindergartens} детсадов в радиусе 5 км`
+        : 'нет данных OSM',
+      badge: (infra.schools+infra.kindergartens)>=4?{text:'Семейный район',cls:'badge-green'}:(infra.schools+infra.kindergartens)>=2?{text:'Есть',cls:'badge-amber'}:(infra.schools+infra.kindergartens)>0?{text:'Мало',cls:'badge-muted'}:{text:'нет данных',cls:'badge-muted'},
+    },
+    {
+      icon:'☕', name:'Кафе / рестораны (пешеходный трафик)',
+      detail: infra.cafes>0 ? `${infra.cafes} заведений в радиусе 5 км` : 'нет данных OSM',
+      badge: infra.cafes>=8?{text:'Высокий трафик',cls:'badge-green'}:infra.cafes>=4?{text:'Средний трафик',cls:'badge-amber'}:infra.cafes>0?{text:'Низкий трафик',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
+    },
+    {
+      icon:'🏢', name:'Офисы (дневная аудитория)',
+      detail: infra.offices>0 ? `${infra.offices} офисных зданий в радиусе 5 км` : 'нет данных OSM',
+      badge: infra.offices>=5?{text:'Деловой район',cls:'badge-amber'}:infra.offices>=2?{text:'Есть офисы',cls:'badge-amber'}:infra.offices>0?{text:'Мало',cls:'badge-muted'}:{text:'нет данных',cls:'badge-muted'},
+    },
+    {
+      icon:'🛒', name:'Супермаркеты и ТЦ',
+      detail: (infra.supermarkets+infra.malls)>0
+        ? `${infra.supermarkets} магазинов · ${infra.malls} ТЦ в радиусе 5 км`
+        : 'нет данных OSM',
+      badge: (infra.malls>0||infra.supermarkets>=3)?{text:'Трафик есть',cls:'badge-green'}:(infra.supermarkets>0)?{text:'Есть',cls:'badge-amber'}:{text:'нет данных',cls:'badge-muted'},
+    },
+  ];
+  $('factorGrid').innerHTML = factors.map(f=>`
+    <div class="factor-row">
+      <div class="factor-icon">${f.icon}</div>
+      <div class="factor-info">
+        <div class="factor-name">${f.name}</div>
+        <div class="factor-detail">${f.detail}</div>
+      </div>
+      <span class="factor-badge ${f.badge.cls}">${f.badge.text}</span>
+    </div>`).join('');
+
+  // BARS
+  $('competitionBars').innerHTML = [
+    {name:'Конкуренция',       val:scores.competitionRaw,  color:'#ff5f5f'},
+    {name:'Насыщенность',      val:scores.saturation,      color:'#ffb347'},
+    {name:'Потенциал рынка',       val:scores.opportunity,     color:'#c8f56a'},
+    {name:'Инфраструктура',    val:scores.infraScore,      color:'#5b9cf6'},
+    {name:'Итоговый балл',   val:scores.potential,       color:'#1afe9a'},
+  ].map(b=>`
+    <div class="bar-row">
+      <div class="bar-meta"><span class="name">${b.name}</span><span class="val">${b.val}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${b.val}%;background:${b.color};opacity:.85"></div></div>
+    </div>`).join('');
+
+  // FINANCE
+  $('financeBlock').innerHTML = [
+    {label:'Прогноз членов/мес',   val:finance.members+' чел.',        cls:'neutral'},
+    {label:'Средний абонемент',     val:fmtKZT(C.AVG_MEMBERSHIP_KZT),  cls:'neutral'},
+    {label:'Загрузка зала',         val:finance.fillRate+'%',           cls:finance.fillRate>70?'positive':finance.fillRate>40?'neutral':'warn'},
+    {label:'Выручка/мес',           val:fmtKZT(finance.revenue),        cls:'neutral'},
+    {label:'Расходы/мес',           val:fmtKZT(finance.totalCosts),     cls:'neutral'},
+    {label:'Прибыль/мес',           val:fmtKZT(finance.profit),         cls:finance.profit>0?'positive':'warn'},
+    {label:'Маржа',                  val:finance.margin+'%',            cls:finance.margin>25?'positive':finance.margin>10?'neutral':'warn'},
+    {label:'Окупаемость',           val:finance.payback?finance.payback+' лет':'убыток', cls:!finance.payback?'warn':+finance.payback<3?'positive':+finance.payback<5?'neutral':'warn'},
+  ].map(f=>`
+    <div class="fi-item"><span class="fi-label">${f.label}</span><span class="fi-val ${f.cls}">${f.val}</span></div>`).join('');
+
+  // SCENARIOS
+  $('scenarioBlock').innerHTML = `
+    <div style="font-size:.8rem;color:var(--muted);font-family:var(--mono);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">Сценарии</div>
+    <div class="fi-item"><span class="fi-label">🔴 Пессимистично (−35%)</span><span class="fi-val warn">${fmtKZT(finance.profitPess)}</span></div>
+    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.pessimistic} членов</span><span class="fi-val warn">${fmtKZT(finance.revenuePess)}</span></div>
+    <div class="fi-divider"></div>
+    <div class="fi-item"><span class="fi-label">🟡 Базовый</span><span class="fi-val neutral">${fmtKZT(finance.profit)}</span></div>
+    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.members} членов</span><span class="fi-val neutral">${fmtKZT(finance.revenue)}</span></div>
+    <div class="fi-divider"></div>
+    <div class="fi-item"><span class="fi-label">🟢 Оптимистично (+35%)</span><span class="fi-val positive">${fmtKZT(finance.profitOpt)}</span></div>
+    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.optimistic} членов</span><span class="fi-val positive">${fmtKZT(finance.revenueOpt)}</span></div>
+    <div style="margin-top:1rem;padding:.65rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.76rem;color:var(--muted);font-family:var(--mono);line-height:1.5">
+      Инвестиции: ${fmtKZT(C.INVESTMENT_KZT)}<br>
+      Постоянные расходы: ${fmtKZT(C.FIXED_COSTS_KZT)}/мес<br>
+      Вместимость: ${C.CLASSES_PER_DAY}×${C.MAX_PER_CLASS} чел/день
+    </div>`;
+
+  // AI
+  if(aiText){
+    $('aiSummary').innerHTML=`<div class="ai-points">${aiText.split('\n').filter(l=>l.trim()).map(l=>`<div class="ai-point">${l.trim()}</div>`).join('')}</div>`;
+  }
+
+  // COMPETITORS
+  $('compLabel').textContent = `Найденные конкуренты в радиусе 5 км (${competitors.length})`;
+  const DIRECT_KW = ['женск','ladies','girls','пилатес','йога','растяжк','стретч','танц'];
+  $('competitorList').innerHTML = competitors.length
+    ? competitors.map((c,i)=>{
+        const isDirect = DIRECT_KW.some(k=>(c.name+c.rubrics.join(' ')).toLowerCase().includes(k));
+        const distCls  = c.distance<400?'near':c.distance<900?'mid':'far';
+        const threat   = isDirect
+          ? `<span class="comp-threat badge-red">прямой конкурент</span>`
+          : `<span class="comp-threat badge-muted">косвенный</span>`;
+        return `<div class="comp-card">
+          <span class="comp-rank">${String(i+1).padStart(2,'0')}</span>
+          <div class="comp-info">
+            <span class="comp-name">${c.name}</span>
+            <span class="comp-type">${c.rubrics.slice(0,2).join(' · ')||'—'}</span>
+            ${threat}
+          </div>
+          <div class="comp-right">
+            <span class="comp-stars">${c.rating?'★ '+c.rating:'<span style="color:var(--muted)">нет рейт.</span>'}</span>
+            <span class="comp-reviews">${c.reviews?c.reviews+' отз.':'—'}</span>
+            <span class="comp-dist ${distCls}">${c.distance}м</span>
+          </div>
+        </div>`;
+      }).join('')
+    : '<p style="color:var(--muted);font-size:.85rem;padding:1rem 0">Конкуренты не найдены — отличное преимущество первого игрока в районе!</p>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════════════════════
+async function startAnalysis() {
+  clearError();
+  const input = $('addressInput').value.trim();
+  if(!input){ showError('Введите адрес'); return; }
+
+  $('btnAnalyze').disabled = true;
+  hide('heroSection'); show('loaderSection'); setStep(1);
+
+  try {
+    const geo = await geocode(input);
+
+    setStep(2);
+    const competitors = await fetchCompetitors(geo.lat, geo.lng);
+
+    setStep(3);
+    const infra = await fetchInfrastructure(geo.lat, geo.lng);
+
+    setStep(4);
+    const scores  = computeScores(competitors, infra);
+    const finance = computeFinance(scores);
+
+    setStep(5);
+    let aiText = null;
+    try { aiText = await fetchAISummary(geo.address, scores, finance, competitors); } catch(e){}
+
+    hide('loaderSection'); show('resultsSection');
+    render(geo.address, competitors, scores, finance, aiText);
+
+  } catch(err) {
+    hide('loaderSection'); show('heroSection');
+    showError('Ошибка: ' + err.message);
+    $('btnAnalyze').disabled = false;
+  }
+}
+
+function resetApp(){
+  hide('resultsSection'); show('heroSection'); clearError();
+  $('btnAnalyze').disabled = false;
+  $('addressInput').focus();
+}
+
+$('addressInput').addEventListener('keydown', e => { if(e.key==='Enter') startAnalysis(); });
+</script>
+</body>
+</html>
