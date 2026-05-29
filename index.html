@@ -133,22 +133,16 @@
   .comp-name{font-size:.88rem;font-weight:500}
   .comp-type{font-size:.73rem;color:var(--muted);font-family:var(--mono)}
   .comp-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-  .comp-stars{font-size:.82rem;color:var(--warn);font-family:var(--mono)}
-  .comp-reviews{font-size:.73rem;color:var(--muted);font-family:var(--mono)}
   .comp-dist{font-size:.73rem;font-family:var(--mono)}
   .comp-dist.near{color:var(--danger)}.comp-dist.mid{color:var(--warn)}.comp-dist.far{color:var(--muted)}
-
-  /* THREAT BADGE on competitor */
+  .comp-hours{font-size:.7rem;color:var(--muted);font-family:var(--mono)}
   .comp-threat{font-size:.68rem;font-family:var(--mono);padding:2px 7px;border-radius:99px;margin-top:2px}
 
-  /* AI CARD */
-  .ai-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1.5rem}
-  .ai-badge{font-family:var(--mono);font-size:.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.85rem;display:flex;align-items:center;gap:6px}
-  .ai-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .ai-points{display:flex;flex-direction:column;gap:.55rem}
-  .ai-point{display:flex;align-items:flex-start;gap:8px;font-size:.88rem;color:var(--text);line-height:1.6}
-  .ai-point::before{content:'→';color:var(--accent);font-family:var(--mono);flex-shrink:0;margin-top:1px}
+  /* VERDICT BLOCK */
+  .verdict{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1.5rem;display:flex;gap:1.25rem;align-items:flex-start;flex-wrap:wrap}
+  .verdict-icon{font-size:2rem;flex-shrink:0;margin-top:2px}
+  .verdict-text h4{font-size:1rem;font-weight:600;margin-bottom:6px}
+  .verdict-text p{font-size:.87rem;color:var(--muted);line-height:1.6}
 
   /* TAGS */
   .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
@@ -157,12 +151,6 @@
   .tag.amber{border-color:rgba(255,179,71,.3);color:var(--warn)}
   .tag.red{border-color:rgba(255,95,95,.3);color:var(--danger)}
   .tag.pink{border-color:rgba(240,98,146,.3);color:var(--pink)}
-
-  /* VERDICT BLOCK */
-  .verdict{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1.5rem;display:flex;gap:1.25rem;align-items:flex-start;flex-wrap:wrap}
-  .verdict-icon{font-size:2rem;flex-shrink:0;margin-top:2px}
-  .verdict-text h4{font-size:1rem;font-weight:600;margin-bottom:6px}
-  .verdict-text p{font-size:.87rem;color:var(--muted);line-height:1.6}
 
   .footer{border-top:1px solid var(--border);padding:1rem 1.5rem;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
   .footer span{font-size:.75rem;color:var(--muted);font-family:var(--mono)}
@@ -175,7 +163,7 @@
   <div id="heroSection" class="hero">
     <p class="eyebrow">📍 анализ локации · женская фитнес-студия</p>
     <h1>Найти лучшую точку для <span>открытия</span></h1>
-    <p>Введите адрес — система проверит конкурентов, трафик и потенциал района через 2ГИС.</p>
+    <p>Введите адрес — система проверит конкурентов, трафик и потенциал района через OpenStreetMap.</p>
 
     <div class="search-wrap">
       <div class="search-box">
@@ -184,14 +172,14 @@
           <circle cx="12" cy="8" r="2.5"/>
         </svg>
         <input id="addressInput" class="search-input" type="text"
-          placeholder="Например: проспект Абая 150, Алматы"/>
+          placeholder="Например: Тверская 10, Москва или Красный проспект 50, Новосибирск"/>
         <button id="btnAnalyze" class="btn-analyze" onclick="startAnalysis()">Анализировать</button>
       </div>
-      <p class="hint">Алматы, Москва, Минск, Бишкек — любой город СНГ</p>
-    <div class="currency-toggle">
-      <button class="currency-btn active" onclick="setCurrency('KZT',this)">₸ Тенге</button>
-      <button class="currency-btn" onclick="setCurrency('RUB',this)">₽ Рубли</button>
-    </div>
+      <p class="hint">Москва, Казань, Новосибирск, Екатеринбург — любой город России и СНГ</p>
+      <div class="currency-toggle">
+        <button class="currency-btn active" onclick="setCurrency('RUB',this)">₽ Рубли</button>
+        <button class="currency-btn" onclick="setCurrency('KZT',this)">₸ Тенге</button>
+      </div>
     </div>
 
     <div id="errorBox" class="error-box hidden"></div>
@@ -206,7 +194,7 @@
         <div class="step" id="step2">Поиск конкурентов по фитнесу</div>
         <div class="step" id="step3">Анализ инфраструктуры района</div>
         <div class="step" id="step4">Расчёт метрик и финансов</div>
-        <div class="step" id="step5">AI-резюме</div>
+        <div class="step" id="step5">Формирование отчёта</div>
       </div>
     </div>
   </div>
@@ -267,15 +255,6 @@
       <div class="panel" id="scenarioBlock"></div>
     </div>
 
-    <!-- AI -->
-    <p class="section-label">AI-резюме</p>
-    <div class="ai-card">
-      <div class="ai-badge">AI-анализ · женская фитнес-студия</div>
-      <div id="aiSummary">
-        <div class="ai-points"><div class="ai-point" style="color:var(--muted)">AI-резюме недоступно — OpenAI ключ не указан в коде.</div></div>
-      </div>
-    </div>
-
     <!-- Competitors -->
     <p class="section-label" id="compLabel">Конкуренты в радиусе</p>
     <div class="competitor-list" id="competitorList"></div>
@@ -283,24 +262,20 @@
 
   <div class="footer">
     <span>📍 женская фитнес-студия · анализ локации</span>
-    <span>данные: 2ГИС</span>
-    <span>КЗ · РФ · БЕЛ · КГ</span>
+    <span>данные: OpenStreetMap</span>
+    <span>РФ · КЗ · БЕЛ · КГ</span>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// КОНФИГ — настройте под себя
+// КОНФИГ
 // ═══════════════════════════════════════════════════════════
-// API запросы идут через /api/proxy (Vercel Function)
-const OPENAI_KEY = ''; // вставьте OpenAI ключ сюда для AI-резюме
-
-// Валюта — переключается кнопкой
 const CURRENCIES = {
-  KZT: { symbol:'₸', avgMembership:25000, fixedCosts:800000, investment:12000000, name:'тг' },
   RUB: { symbol:'₽', avgMembership:4500,  fixedCosts:150000, investment:2500000,  name:'руб' },
+  KZT: { symbol:'₸', avgMembership:25000, fixedCosts:800000, investment:12000000, name:'тг' },
 };
-let CURR = CURRENCIES.KZT;
+let CURR = CURRENCIES.RUB;
 
 function setCurrency(code, btn) {
   CURR = CURRENCIES[code];
@@ -312,33 +287,17 @@ function fmtMoney(n){ return new Intl.NumberFormat('ru-RU').format(Math.round(n)
 
 const C = {
   SEARCH_RADIUS_M: 5000,
-
-  // Ключевые слова для поиска конкурентов — женский фитнес, Алматы
-  // Ищем по словам, не рубрикам — надёжнее и покрывает больше
-  SEARCH_KEYWORDS: [
-    'фитнес студия',
-    'женский фитнес',
-    'фитнес клуб',
-    'йога студия',
-    'пилатес',
-    'групповые тренировки',
-    'тренажерный зал',
-    'танцевальная студия',
-    'растяжка студия',
-  ],
-
-  // Финансы — средний сегмент Алматы, женская студия
-  get AVG_MEMBERSHIP_KZT(){ return CURR.avgMembership; },
-  TARGET_MEMBERS_BASE: 150,    // ёмкость при нулевой конкуренции (групповой формат)
-  CLASSES_PER_DAY: 8,          // кол-во тренировок в день (9:00–21:00, каждый час)
-  MAX_PER_CLASS: 15,            // макс. человек на групповой
-  get FIXED_COSTS_KZT(){ return CURR.fixedCosts; },
-  VARIABLE_COST_PCT: 0.20,     // доля переменных от выручки
-  get INVESTMENT_KZT(){ return CURR.investment; },
+  TARGET_MEMBERS_BASE: 150,
+  CLASSES_PER_DAY: 8,
+  MAX_PER_CLASS: 15,
+  get AVG_MEMBERSHIP(){ return CURR.avgMembership; },
+  get FIXED_COSTS(){ return CURR.fixedCosts; },
+  get INVESTMENT(){ return CURR.investment; },
+  VARIABLE_COST_PCT: 0.20,
 };
 
 // ═══════════════════════════════════════════════════════════
-// UI
+// UI HELPERS
 // ═══════════════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
@@ -348,161 +307,6 @@ function showError(msg){ const b=$('errorBox'); b.textContent=msg; b.classList.r
 function clearError(){ $('errorBox').classList.add('hidden'); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function fmt(n){ return new Intl.NumberFormat('ru-RU').format(Math.round(n)); }
-function fmtKZT(n){ return fmtMoney(n); }
-
-// ═══════════════════════════════════════════════════════════
-// GEOCODER — 2ГИС
-// ═══════════════════════════════════════════════════════════
-async function geocode(address) {
-  const _p = new URLSearchParams({ endpoint:'geocode', q:address, fields:'items.point,items.full_name' });
-  const resp = await fetch(`/api/proxy?${_p}`);
-  if(!resp.ok) throw new Error(`2ГИС Geocoder HTTP ${resp.status} — проверьте ключ`);
-  const data = await resp.json();
-  const items = data.result?.items;
-  if(!items?.length) throw new Error('Адрес не найден. Попробуйте добавить город, например «улица Абая 10, Алматы»');
-  const item = items[0];
-  if(!item.point) throw new Error('2ГИС не вернул координаты для этого адреса');
-  return { lat: item.point.lat, lng: item.point.lon, address: item.full_name || address };
-}
-
-// ═══════════════════════════════════════════════════════════
-// PLACES SEARCH — 2ГИС по ключевым словам
-// Каждый запрос = отдельное слово → объединяем и дедуплицируем
-// ═══════════════════════════════════════════════════════════
-async function fetchCompetitors(lat, lng) {
-  const seen = new Set();
-  const results = [];
-
-  for(const kw of C.SEARCH_KEYWORDS){
-    const _p = new URLSearchParams({
-      endpoint: 'search', q: kw,
-      point: `${lng},${lat}`,
-      radius: C.SEARCH_RADIUS_M,
-      fields: 'items.point,items.reviews,items.rating,items.rubrics,items.address,items.name',
-      page_size: 20, sort: 'distance', type: 'branch',
-    });
-
-    try {
-      const resp = await fetch(`/api/proxy?${_p}`);
-      if(!resp.ok){
-        if(resp.status===403) throw new Error('2ГИС API доступ запрещён (403) — ключ недействителен или лимит исчерпан');
-        await sleep(300);
-        continue;
-      }
-      const data = await resp.json();
-
-      for(const item of (data.result?.items || [])){
-        if(!item.id || seen.has(item.id)) continue;
-        seen.add(item.id);
-
-        const rating     = item.reviews?.general_rating ? +item.reviews.general_rating : null;
-        const reviewCnt  = item.reviews?.rating_count   || 0;
-        const rubrics    = (item.rubrics||[]).map(r=>r.name).filter(Boolean);
-        const dist       = item.point
-          ? Math.round(haversine(lat,lng,item.point.lat,item.point.lon))
-          : null;
-
-        results.push({
-          id:       item.id,
-          name:     item.name || '—',
-          rating,
-          reviews:  reviewCnt,
-          rubrics,
-          address:  item.address_name || item.address?.name || '—',
-          distance: dist,
-        });
-      }
-    } catch(e){
-      if(e.message.includes('403')) throw e;
-      // остальные ошибки — пропускаем и идём дальше
-    }
-
-    await sleep(150);
-  }
-
-  // Убираем нерелевантные (банки, магазины и т.п.) — оставляем только фитнес/здоровье
-  const FITNESS_KEYWORDS = ['фитнес','спорт','йога','пилатес','тренаж','студия','танц','растяжк','boxing','crossfit','кросфит','wellness','бассейн','зал','gym','боевые','единоборств','бокс','кикбоксинг','самооборон'];
-  const filtered = results.filter(r => {
-    const haystack = (r.name + ' ' + r.rubrics.join(' ')).toLowerCase();
-    return FITNESS_KEYWORDS.some(kw => haystack.includes(kw));
-  });
-
-  return (filtered.length > 0 ? filtered : results)
-    .filter(r => r.distance !== null)
-    .sort((a,b) => a.distance - b.distance)
-    .slice(0, 25);
-}
-
-// ═══════════════════════════════════════════════════════════
-// ИНФРАСТРУКТУРА — 2ГИС API (работает на хостинге)
-// ═══════════════════════════════════════════════════════════
-async function fetchInfrastructure(lat, lng) {
-  const infra = {
-    residentialBuildings: 0,
-    busStops: 0,
-    stopRoutes: 0,
-    parking: 0,
-    schools: 0,
-    kindergartens: 0,
-    supermarkets: 0,
-    cafes: 0,
-    offices: 0,
-    malls: 0,
-  };
-
-  const R = 5000;
-  const seen = {};
-  const add = (key, items) => {
-    if(!seen[key]) seen[key] = new Set();
-    (items||[]).forEach(it => seen[key].add(it.id));
-    infra[key] = seen[key].size;
-  };
-
-  const req = async (q, radius, useType) => {
-    const typeParam = useType ? '&type=branch' : '';
-    const _ip = new URLSearchParams({ endpoint:'search', q, point:`${lng},${lat}`, radius, page_size:50, fields:'items.id,items.name', ...(useType?{type:'branch'}:{}) });
-    try {
-      const r = await fetch(`/api/proxy?${_ip}`);
-      if(!r.ok) return [];
-      const d = await r.json();
-      return d.result?.items || [];
-    } catch(e){ return []; }
-  };
-
-  const queries = [
-    // Жилые дома
-    async () => add('residentialBuildings', await req('жилой дом', R, false)),
-    async () => add('residentialBuildings', await req('жилой комплекс', R, false)),
-    async () => add('residentialBuildings', await req('многоквартирный дом', R, false)),
-    // Остановки
-    async () => add('busStops', await req('автобусная остановка', R, false)),
-    async () => add('busStops', await req('остановка', R, false)),
-    async () => add('stopRoutes', await req('автобусный маршрут', R, false)),
-    async () => add('stopRoutes', await req('троллейбус', R, false)),
-    async () => add('stopRoutes', await req('трамвай', R, false)),
-    // Парковки
-    async () => add('parking', await req('парковка', R, false)),
-    // Образование
-    async () => add('schools', await req('школа', R, true)),
-    async () => add('kindergartens', await req('детский сад', R, true)),
-    // Магазины / трафик
-    async () => add('supermarkets', await req('супермаркет', R, true)),
-    async () => add('malls', await req('торговый центр', R, true)),
-    async () => add('cafes', await req('кафе', R, true)),
-    async () => add('cafes', await req('ресторан', R, true)),
-    // Офисы
-    async () => add('offices', await req('бизнес центр', R, true)),
-    async () => add('offices', await req('офисный центр', R, true)),
-  ];
-
-  // Запускаем пакетами по 3 чтобы не превысить лимит
-  for(let i = 0; i < queries.length; i += 3){
-    await Promise.all(queries.slice(i, i+3).map(fn => fn()));
-    await sleep(200);
-  }
-
-  return infra;
-}
 
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
@@ -511,27 +315,171 @@ function haversine(lat1,lng1,lat2,lng2){
 }
 
 // ═══════════════════════════════════════════════════════════
+// GEOCODER — Nominatim (OpenStreetMap, бесплатно, без ключа)
+// ═══════════════════════════════════════════════════════════
+async function geocode(address) {
+  const _p = new URLSearchParams({ endpoint:'nominatim', q:address, limit:1 });
+  const resp = await fetch(`/api/proxy?${_p}`);
+  if(!resp.ok) throw new Error(`Геокодер HTTP ${resp.status}`);
+  const data = await resp.json();
+  if(!Array.isArray(data) || !data.length) {
+    throw new Error('Адрес не найден. Уточните улицу и город, например «Тверская 10, Москва»');
+  }
+  const item = data[0];
+  return {
+    lat: parseFloat(item.lat),
+    lng: parseFloat(item.lon),
+    address: item.display_name || address,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// OVERPASS HELPER — запросы к OpenStreetMap через прокси
+// ═══════════════════════════════════════════════════════════
+async function overpassFetch(query) {
+  const resp = await fetch('/api/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: query }),
+  });
+  if(!resp.ok) throw new Error(`Overpass HTTP ${resp.status}`);
+  return resp.json();
+}
+
+// ═══════════════════════════════════════════════════════════
+// КОНКУРЕНТЫ — Overpass API (реальные данные OpenStreetMap)
+// ═══════════════════════════════════════════════════════════
+async function fetchCompetitors(lat, lng) {
+  const r = C.SEARCH_RADIUS_M;
+  const data = await overpassFetch(`[out:json][timeout:25];
+(
+  node["leisure"="fitness_centre"](around:${r},${lat},${lng});
+  way["leisure"="fitness_centre"](around:${r},${lat},${lng});
+  node["leisure"="sports_centre"](around:${r},${lat},${lng});
+  way["leisure"="sports_centre"](around:${r},${lat},${lng});
+  node["amenity"="gym"](around:${r},${lat},${lng});
+  way["amenity"="gym"](around:${r},${lat},${lng});
+  node["sport"="yoga"](around:${r},${lat},${lng});
+  node["sport"="pilates"](around:${r},${lat},${lng});
+  node["sport"="dancing"](around:${r},${lat},${lng});
+  node["sport"="aerobics"](around:${r},${lat},${lng});
+);
+out center tags;`);
+
+  const seen = new Set();
+  const results = [];
+
+  for(const el of (data.elements || [])){
+    const tags = el.tags || {};
+    if(!tags.name) continue;
+    const elLat = el.lat ?? el.center?.lat;
+    const elLng = el.lon ?? el.center?.lon;
+    if(!elLat || !elLng) continue;
+    const dist = Math.round(haversine(lat, lng, elLat, elLng));
+
+    // Дедупликация по имени + приблизительному расстоянию
+    const key = tags.name.toLowerCase().replace(/\s+/g,'') + '_' + Math.round(dist/100);
+    if(seen.has(key)) continue;
+    seen.add(key);
+
+    const rubrics = [];
+    if(tags.leisure === 'fitness_centre') rubrics.push('Фитнес-центр');
+    else if(tags.leisure === 'sports_centre') rubrics.push('Спортивный центр');
+    else if(tags.amenity === 'gym') rubrics.push('Спортзал');
+    if(tags.sport) rubrics.push(...tags.sport.split(';').map(s=>s.trim()).slice(0,2));
+
+    results.push({
+      id: String(el.id),
+      name: tags.name,
+      rating: null,
+      reviews: 0,
+      rubrics,
+      address: [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' ') || '—',
+      distance: dist,
+      openingHours: tags.opening_hours || null,
+    });
+  }
+
+  return results.sort((a,b)=>a.distance-b.distance).slice(0,25);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ИНФРАСТРУКТУРА — Overpass API (реальные данные)
+// ═══════════════════════════════════════════════════════════
+async function fetchInfrastructure(lat, lng) {
+  const infra = {
+    residentialBuildings:0, busStops:0, stopRoutes:0, parking:0,
+    schools:0, kindergartens:0, supermarkets:0, cafes:0, offices:0, malls:0,
+  };
+
+  // Запрос 1: все объекты инфраструктуры
+  const objData = await overpassFetch(`[out:json][timeout:30];
+(
+  node["highway"="bus_stop"](around:3000,${lat},${lng});
+  node["public_transport"="stop_position"]["name"](around:3000,${lat},${lng});
+  node["amenity"="parking"](around:2000,${lat},${lng});
+  way["amenity"="parking"](around:2000,${lat},${lng});
+  way["building"~"^(residential|apartments)$"](around:2000,${lat},${lng});
+  node["amenity"="school"](around:4000,${lat},${lng});
+  way["amenity"="school"](around:4000,${lat},${lng});
+  node["amenity"="kindergarten"](around:4000,${lat},${lng});
+  way["amenity"="kindergarten"](around:4000,${lat},${lng});
+  node["amenity"~"^(cafe|restaurant)$"](around:3000,${lat},${lng});
+  node["shop"="supermarket"](around:4000,${lat},${lng});
+  way["shop"="supermarket"](around:4000,${lat},${lng});
+  node["shop"="mall"](around:5000,${lat},${lng});
+  way["shop"="mall"](around:5000,${lat},${lng});
+  way["building"="office"](around:3000,${lat},${lng});
+  node["office"~"."](around:3000,${lat},${lng});
+);
+out ids tags;`);
+
+  const seenIds = new Set();
+  for(const el of (objData.elements || [])){
+    if(seenIds.has(el.id)) continue;
+    seenIds.add(el.id);
+    const t = el.tags || {};
+    if(t.highway === 'bus_stop' || (t.public_transport === 'stop_position' && t.name)) infra.busStops++;
+    else if(t.amenity === 'parking') infra.parking++;
+    else if(t.building === 'residential' || t.building === 'apartments') infra.residentialBuildings++;
+    else if(t.amenity === 'school') infra.schools++;
+    else if(t.amenity === 'kindergarten') infra.kindergartens++;
+    else if(t.amenity === 'cafe' || t.amenity === 'restaurant') infra.cafes++;
+    else if(t.shop === 'supermarket') infra.supermarkets++;
+    else if(t.shop === 'mall') infra.malls++;
+    else if(t.building === 'office' || (t.office && t.office !== 'no')) infra.offices++;
+  }
+
+  // Запрос 2: автобусные маршруты
+  await sleep(300);
+  try {
+    const routeData = await overpassFetch(`[out:json][timeout:15];
+relation["type"="route"]["route"~"^(bus|trolleybus|tram)$"](around:1000,${lat},${lng});
+out ids;`);
+    infra.stopRoutes = (routeData.elements || []).length;
+  } catch(e) {
+    infra.stopRoutes = Math.round(infra.busStops * 1.5);
+  }
+
+  return infra;
+}
+
+// ═══════════════════════════════════════════════════════════
 // SCORING
 // ═══════════════════════════════════════════════════════════
 function computeScores(competitors, infra) {
   const n = competitors.length;
-  const rated = competitors.filter(c => c.rating > 0);
-  const avgRating   = rated.length ? +(rated.reduce((s,c)=>s+c.rating,0)/rated.length).toFixed(1) : 0;
-  const avgReviews  = rated.length ? Math.round(rated.reduce((s,c)=>s+c.reviews,0)/rated.length) : 0;
 
-  // --- Конкуренция ---
   const competitionRaw  = Math.round(Math.min(n/12,1)*100);
   const saturation      = Math.round(Math.min(n/8,1)*100);
-  const qualityPressure = avgRating ? Math.round(Math.max(0,(avgRating-3)/2*100)) : 0;
 
-  // Прямые конкуренты (женский/групповой формат)
-  const DIRECT_KW = ['женск','ladies','girls','пилатес','йога','растяжк','стретч','танц','групп'];
+  const DIRECT_KW = ['женск','ladies','girls','пилатес','йога','растяжк','стретч','танц','групп','aerobics','pilates','yoga','dancing'];
   const directCount = competitors.filter(c => {
-    const h = (c.name+' '+c.rubrics.join(' ')).toLowerCase();
-    return DIRECT_KW.some(k=>h.includes(k));
+    const h = (c.name + ' ' + c.rubrics.join(' ')).toLowerCase();
+    return DIRECT_KW.some(kw=>h.includes(kw));
   }).length;
 
-  // --- Инфраструктура (0-100) ---
+  // Инфраструктура (0-100)
   const residentialScore = Math.min(infra.residentialBuildings/20,1)*100;
   const transportScore   = Math.min(infra.busStops/6,1)*100;
   const routeScore       = Math.min(infra.stopRoutes/8,1)*100;
@@ -539,8 +487,6 @@ function computeScores(competitors, infra) {
   const activityScore    = Math.min((infra.cafes+infra.supermarkets+infra.malls*3)/15,1)*100;
   const audienceScore    = Math.min((infra.schools+infra.kindergartens+infra.offices)/10,1)*100;
 
-  // Взвешенный инфра-скор для женской студии
-  // Жилые дома важнее всего — это ЦА рядом с домом
   const infraScore = Math.round(
     residentialScore * 0.35 +
     transportScore   * 0.20 +
@@ -550,42 +496,36 @@ function computeScores(competitors, infra) {
     audienceScore    * 0.10
   );
 
-  // --- Потенциал рынка ---
   const opportunity = Math.round(Math.max(0, Math.min(100,
     100
-    - competitionRaw * 0.45
-    - qualityPressure * 0.25
+    - competitionRaw * 0.55
     - (directCount/Math.max(n,1)) * 30
   )));
 
-  // --- Potential (итоговый) ---
-  // Взвешиваем: opportunity 40%, инфраструктура 35%, анти-насыщенность 25%
   const potential = Math.round(
-    opportunity     * 0.40 +
-    infraScore      * 0.35 +
-    (100-saturation)* 0.25
+    opportunity      * 0.40 +
+    infraScore       * 0.35 +
+    (100-saturation) * 0.25
   );
 
-  // --- Вердикт ---
+  // Вердикт
   let verdict, verdictIcon, verdictColor;
-  if(potential >= 72)      { verdict='Сильная локация'; verdictIcon='✅'; verdictColor='accent'; }
-  else if(potential >= 55) { verdict='Хорошая локация с оговорками'; verdictIcon='⚠️'; verdictColor='warn'; }
-  else if(potential >= 38) { verdict='Рискованная локация'; verdictIcon='🔶'; verdictColor='warn'; }
-  else                     { verdict='Сложная локация'; verdictIcon='❌'; verdictColor='danger'; }
+  if(potential >= 72)      { verdict='Сильная локация';               verdictIcon='✅'; verdictColor='accent'; }
+  else if(potential >= 55) { verdict='Хорошая локация с оговорками';  verdictIcon='⚠️'; verdictColor='warn'; }
+  else if(potential >= 38) { verdict='Рискованная локация';           verdictIcon='🔶'; verdictColor='warn'; }
+  else                     { verdict='Сложная локация';               verdictIcon='❌'; verdictColor='danger'; }
 
   let marketLabel, marketDesc;
-  if(n===0)     { marketLabel='Конкурентов нет';           marketDesc='Район не освоен — первый игрок получает всю аудиторию'; }
-  else if(n<3)  { marketLabel='Низкая конкуренция';        marketDesc='Единичные игроки — пространство для роста есть'; }
-  else if(n<6)  { marketLabel='Умеренная конкуренция';     marketDesc='Конкуренты присутствуют, но рынок не насыщен'; }
-  else if(n<10) { marketLabel='Высокая конкуренция';       marketDesc='Насыщенный рынок — нужно чёткое УТП и дифференциация'; }
+  if(n===0)     { marketLabel='Конкурентов нет';            marketDesc='Район не освоен — первый игрок получает всю аудиторию'; }
+  else if(n<3)  { marketLabel='Низкая конкуренция';         marketDesc='Единичные игроки — пространство для роста есть'; }
+  else if(n<6)  { marketLabel='Умеренная конкуренция';      marketDesc='Конкуренты присутствуют, но рынок не насыщен'; }
+  else if(n<10) { marketLabel='Высокая конкуренция';        marketDesc='Насыщенный рынок — нужно чёткое УТП и дифференциация'; }
   else           { marketLabel='Очень высокая конкуренция'; marketDesc='Перегретый рынок — ниша и уникальный формат обязательны'; }
 
   const tags = [];
   if(n===0)                         tags.push({label:'Нет конкурентов',cls:'green'});
   else if(directCount===0&&n>0)     tags.push({label:'Нет прямых конкурентов',cls:'green'});
   else if(directCount>0)            tags.push({label:`${directCount} прямых конкурента`,cls:'red'});
-  if(avgRating>4.3&&n>0)            tags.push({label:'Сильные конкуренты',cls:'amber'});
-  if(avgRating>0&&avgRating<3.8)    tags.push({label:'Слабые рейтинги рынка',cls:'green'});
   if(infraScore>65)                 tags.push({label:'Хорошая инфраструктура',cls:'green'});
   if(infra.residentialBuildings>10) tags.push({label:'Жилой район ✓',cls:'green'});
   if(infra.busStops>=3)             tags.push({label:'Хороший транспорт',cls:'green'});
@@ -595,9 +535,8 @@ function computeScores(competitors, infra) {
   if(infra.parking<2)               tags.push({label:'Мало парковок',cls:'amber'});
 
   return {
-    n, directCount, avgRating, avgReviews,
-    competitionRaw, saturation, qualityPressure,
-    opportunity, potential, infraScore,
+    n, directCount,
+    competitionRaw, saturation, opportunity, potential, infraScore,
     residentialScore:Math.round(residentialScore),
     transportScore:Math.round(transportScore),
     routeScore:Math.round(routeScore),
@@ -610,88 +549,45 @@ function computeScores(competitors, infra) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// FINANCE — тенге, средний сегмент, групповой формат
+// ФИНАНСЫ
 // ═══════════════════════════════════════════════════════════
 function computeFinance(scores) {
   const {n, opportunity} = scores;
-
-  // Клиентская база уменьшается с конкуренцией
   const compFactor = Math.max(0.35, 1-(n/18));
   const oppFactor  = opportunity/100;
   const members    = Math.round(C.TARGET_MEMBERS_BASE * compFactor * (0.65+oppFactor*0.35));
 
-  const revenue    = members * C.AVG_MEMBERSHIP_KZT;
+  const revenue    = members * C.AVG_MEMBERSHIP;
   const varCosts   = Math.round(revenue * C.VARIABLE_COST_PCT);
-  const totalCosts = C.FIXED_COSTS_KZT + varCosts;
+  const totalCosts = C.FIXED_COSTS + varCosts;
   const profit     = revenue - totalCosts;
   const margin     = revenue > 0 ? Math.round((profit/revenue)*100) : 0;
-  const payback    = profit > 0 ? +(C.INVESTMENT_KZT/profit/12).toFixed(1) : null;
+  const payback    = profit > 0 ? +(C.INVESTMENT/profit/12).toFixed(1) : null;
 
-  // Загрузка зала (сколько % мест занято)
-  const totalSlots  = C.CLASSES_PER_DAY * C.MAX_PER_CLASS * 30; // мест в месяц
-  const fillRate    = Math.round((members / totalSlots) * 100);
+  const totalSlots = C.CLASSES_PER_DAY * C.MAX_PER_CLASS * 30;
+  const fillRate   = Math.min(Math.round((members/totalSlots)*100), 100);
 
-  // Сценарии
   const pessimistic = Math.round(members * 0.65);
   const optimistic  = Math.round(members * 1.35);
 
   return {
-    members, revenue, varCosts, totalCosts, profit, margin, payback,
-    fillRate: Math.min(fillRate, 100),
+    members, revenue, varCosts, totalCosts, profit, margin, payback, fillRate,
     pessimistic, optimistic,
-    revenuePess: pessimistic * C.AVG_MEMBERSHIP_KZT,
-    revenueOpt:  optimistic  * C.AVG_MEMBERSHIP_KZT,
-    profitPess:  pessimistic * C.AVG_MEMBERSHIP_KZT - totalCosts,
-    profitOpt:   optimistic  * C.AVG_MEMBERSHIP_KZT - totalCosts,
+    revenuePess: pessimistic * C.AVG_MEMBERSHIP,
+    revenueOpt:  optimistic  * C.AVG_MEMBERSHIP,
+    profitPess:  pessimistic * C.AVG_MEMBERSHIP - totalCosts,
+    profitOpt:   optimistic  * C.AVG_MEMBERSHIP - totalCosts,
   };
-}
-
-// ═══════════════════════════════════════════════════════════
-// OPENAI
-// ═══════════════════════════════════════════════════════════
-async function fetchAISummary(address, scores, finance, competitors) {
-  if(!OPENAI_KEY) return null;
-
-  const topComps = competitors.slice(0,6).map(c=>
-    `${c.name} (${c.rating?c.rating+'★':'нет рейт.'}, ${c.reviews} отз., ${c.distance}м, рубрики: ${c.rubrics.slice(0,2).join('/')||'—'})`
-  ).join('\n');
-
-  const prompt=`Ты — эксперт по открытию женских фитнес-студий в Казахстане (групповые тренировки, средний сегмент, 15–35 тыс тг/мес).
-
-РЕАЛЬНЫЕ ДАННЫЕ ЛОКАЦИИ (источник: 2ГИС):
-Адрес: ${address}
-Конкурентов найдено: ${scores.n} (из них прямых женских/групповых: ${scores.directCount})
-Средний рейтинг конкурентов: ${scores.avgRating||'нет данных'}
-Конкуренция: ${scores.competitionRaw}/100 | Насыщенность: ${scores.saturation}/100
-Инфраструктура района: ${scores.infraScore}/100
-Жилых домов рядом (до 800м): ${scores.infra.residentialBuildings}
-Остановок транспорта (до 1км): ${scores.infra.busStops} · Маршрутов: ${scores.infra.stopRoutes}
-Парковок (до 400м): ${scores.infra.parking}
-Потенциал рынка Score: ${scores.opportunity}/100
-Итоговый балл: ${scores.potential}/100
-Прогноз членов/мес: ${finance.members} | Выручка: ${fmtKZT(finance.revenue)} | Прибыль: ${fmtKZT(finance.profit)}
-
-Конкуренты:
-${topComps||'не найдено'}
-
-Дай ровно 5 выводов специфично для женской фитнес-студии. Используй ТОЛЬКО данные выше. Каждый вывод — одно предложение с новой строки. Без нумерации.`;
-
-  const resp = await fetch('https://api.openai.com/v1/chat/completions',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':`Bearer ${OPENAI_KEY}`},
-    body:JSON.stringify({model:'gpt-4o-mini',max_tokens:500,messages:[{role:'user',content:prompt}]}),
-  });
-  const data = await resp.json();
-  if(data.error) throw new Error(data.error.message);
-  return data.choices[0].message.content.trim();
 }
 
 // ═══════════════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════════════
-function render(address, competitors, scores, finance, aiText) {
-  $('resultTitle').textContent = address.length>70 ? address.slice(0,67)+'…' : address;
-  $('resultAddr').textContent  = `${scores.n} конкурентов · ${scores.directCount} прямых · радиус ${C.SEARCH_RADIUS_M/1000} км · 2ГИС`;
+function render(address, competitors, scores, finance) {
+  // Обрезаем длинный адрес из Nominatim до города + улицы
+  const shortAddr = address.split(',').slice(0,3).join(',');
+  $('resultTitle').textContent = shortAddr.length>70 ? shortAddr.slice(0,67)+'…' : shortAddr;
+  $('resultAddr').textContent  = `${scores.n} конкурентов · ${scores.directCount} прямых · радиус ${C.SEARCH_RADIUS_M/1000} км · OpenStreetMap`;
 
   // VERDICT
   const verdictDescs = {
@@ -718,13 +614,14 @@ function render(address, competitors, scores, finance, aiText) {
   $('scoreTags').innerHTML    = scores.tags.map(t=>`<span class="tag ${t.cls}">${t.label}</span>`).join('');
 
   // KPIs
+  const {infra} = scores;
   $('kpiGrid').innerHTML = [
-    {label:'Конкурентов всего',   value:scores.n,              sub:`в радиусе 5 км`,       cls:scores.n>8?'danger':scores.n>4?'warn':'accent'},
-    {label:'Прямых конкурентов',  value:scores.directCount,    sub:'женских / групповых форматов',                    cls:scores.directCount>3?'danger':scores.directCount>1?'warn':'accent'},
-    {label:'Потенциал рынка',         value:scores.opportunity+'%',sub:'потенциал рынка',                        cls:scores.opportunity>=65?'accent':scores.opportunity>=40?'warn':'danger'},
-    {label:'Инфраструктура',      value:scores.infraScore+'%', sub:`${scores.infra.residentialBuildings} домов · ${scores.infra.busStops} ост. · ${scores.infra.stopRoutes} марш.`, cls:scores.infraScore>=60?'accent':scores.infraScore>=35?'warn':'danger'},
-    {label:'Выручка / мес',       value:fmtKZT(finance.revenue),sub:`${finance.members} членов`,             cls:'blue'},
-    {label:'Прибыль / мес',       value:fmtKZT(finance.profit), sub:`маржа ${finance.margin}%`,              cls:finance.profit>0?'accent':'danger'},
+    {label:'Конкурентов всего',  value:scores.n,               sub:`в радиусе 5 км`,        cls:scores.n>8?'danger':scores.n>4?'warn':'accent'},
+    {label:'Прямых конкурентов', value:scores.directCount,     sub:'женских/групповых',      cls:scores.directCount>3?'danger':scores.directCount>1?'warn':'accent'},
+    {label:'Потенциал рынка',    value:scores.opportunity+'%', sub:'оценка рынка',           cls:scores.opportunity>=65?'accent':scores.opportunity>=40?'warn':'danger'},
+    {label:'Инфраструктура',     value:scores.infraScore+'%',  sub:`${infra.residentialBuildings} домов · ${infra.busStops} ост. · ${infra.stopRoutes} марш.`, cls:scores.infraScore>=60?'accent':scores.infraScore>=35?'warn':'danger'},
+    {label:'Выручка / мес',      value:fmtMoney(finance.revenue), sub:`${finance.members} членов`, cls:'blue'},
+    {label:'Прибыль / мес',      value:fmtMoney(finance.profit),  sub:`маржа ${finance.margin}%`,  cls:finance.profit>0?'accent':'danger'},
   ].map(k=>`
     <div class="kpi-card">
       <span class="kpi-label">${k.label}</span>
@@ -733,50 +630,40 @@ function render(address, competitors, scores, finance, aiText) {
     </div>`).join('');
 
   // LOCATION FACTORS
-  const {infra} = scores;
-  const noData = (v) => v===0 ? {text:'нет данных',cls:'badge-muted'} : null;
   const factors = [
     {
       icon:'🏠', name:'Жилая застройка (ЦА рядом)',
-      detail: infra.residentialBuildings>0
-        ? `${infra.residentialBuildings} жилых объектов в радиусе 5 км`
-        : 'нет данных OSM',
+      detail: infra.residentialBuildings>0 ? `${infra.residentialBuildings} жилых объектов в радиусе 2 км` : 'нет данных OSM',
       badge: infra.residentialBuildings>=15?{text:'Плотный район',cls:'badge-green'}:infra.residentialBuildings>=6?{text:'Есть застройка',cls:'badge-amber'}:infra.residentialBuildings>0?{text:'Мало домов',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
     },
     {
       icon:'🚌', name:'Остановки транспорта',
-      detail: infra.busStops>0
-        ? `${infra.busStops} остановок · ${infra.stopRoutes} маршрутов в радиусе 5 км`
-        : 'нет данных OSM',
+      detail: infra.busStops>0 ? `${infra.busStops} остановок · ${infra.stopRoutes} маршрутов` : 'нет данных OSM',
       badge: infra.busStops>=4?{text:'Хорошая доступность',cls:'badge-green'}:infra.busStops>=2?{text:'Есть транспорт',cls:'badge-amber'}:infra.busStops>0?{text:'Мало остановок',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
     },
     {
       icon:'🅿️', name:'Парковка',
-      detail: infra.parking>0 ? `${infra.parking} парковок в радиусе 5 км` : 'нет данных OSM',
+      detail: infra.parking>0 ? `${infra.parking} парковок в радиусе 2 км` : 'нет данных OSM',
       badge: infra.parking>=4?{text:'Хорошо',cls:'badge-green'}:infra.parking>=2?{text:'Есть',cls:'badge-amber'}:infra.parking>0?{text:'Мало',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
     },
     {
       icon:'🏫', name:'Школы и детсады (семейная ЦА)',
-      detail: (infra.schools+infra.kindergartens)>0
-        ? `${infra.schools} школ · ${infra.kindergartens} детсадов в радиусе 5 км`
-        : 'нет данных OSM',
+      detail: (infra.schools+infra.kindergartens)>0 ? `${infra.schools} школ · ${infra.kindergartens} детсадов` : 'нет данных OSM',
       badge: (infra.schools+infra.kindergartens)>=4?{text:'Семейный район',cls:'badge-green'}:(infra.schools+infra.kindergartens)>=2?{text:'Есть',cls:'badge-amber'}:(infra.schools+infra.kindergartens)>0?{text:'Мало',cls:'badge-muted'}:{text:'нет данных',cls:'badge-muted'},
     },
     {
       icon:'☕', name:'Кафе / рестораны (пешеходный трафик)',
-      detail: infra.cafes>0 ? `${infra.cafes} заведений в радиусе 5 км` : 'нет данных OSM',
+      detail: infra.cafes>0 ? `${infra.cafes} заведений в радиусе 3 км` : 'нет данных OSM',
       badge: infra.cafes>=8?{text:'Высокий трафик',cls:'badge-green'}:infra.cafes>=4?{text:'Средний трафик',cls:'badge-amber'}:infra.cafes>0?{text:'Низкий трафик',cls:'badge-red'}:{text:'нет данных',cls:'badge-muted'},
     },
     {
       icon:'🏢', name:'Офисы (дневная аудитория)',
-      detail: infra.offices>0 ? `${infra.offices} офисных зданий в радиусе 5 км` : 'нет данных OSM',
+      detail: infra.offices>0 ? `${infra.offices} офисных зданий в радиусе 3 км` : 'нет данных OSM',
       badge: infra.offices>=5?{text:'Деловой район',cls:'badge-amber'}:infra.offices>=2?{text:'Есть офисы',cls:'badge-amber'}:infra.offices>0?{text:'Мало',cls:'badge-muted'}:{text:'нет данных',cls:'badge-muted'},
     },
     {
       icon:'🛒', name:'Супермаркеты и ТЦ',
-      detail: (infra.supermarkets+infra.malls)>0
-        ? `${infra.supermarkets} магазинов · ${infra.malls} ТЦ в радиусе 5 км`
-        : 'нет данных OSM',
+      detail: (infra.supermarkets+infra.malls)>0 ? `${infra.supermarkets} магазинов · ${infra.malls} ТЦ` : 'нет данных OSM',
       badge: (infra.malls>0||infra.supermarkets>=3)?{text:'Трафик есть',cls:'badge-green'}:(infra.supermarkets>0)?{text:'Есть',cls:'badge-amber'}:{text:'нет данных',cls:'badge-muted'},
     },
   ];
@@ -792,11 +679,11 @@ function render(address, competitors, scores, finance, aiText) {
 
   // BARS
   $('competitionBars').innerHTML = [
-    {name:'Конкуренция',       val:scores.competitionRaw,  color:'#ff5f5f'},
-    {name:'Насыщенность',      val:scores.saturation,      color:'#ffb347'},
-    {name:'Потенциал рынка',       val:scores.opportunity,     color:'#c8f56a'},
-    {name:'Инфраструктура',    val:scores.infraScore,      color:'#5b9cf6'},
-    {name:'Итоговый балл',   val:scores.potential,       color:'#1afe9a'},
+    {name:'Конкуренция',      val:scores.competitionRaw,  color:'#ff5f5f'},
+    {name:'Насыщенность',     val:scores.saturation,      color:'#ffb347'},
+    {name:'Потенциал рынка',  val:scores.opportunity,     color:'#c8f56a'},
+    {name:'Инфраструктура',   val:scores.infraScore,      color:'#5b9cf6'},
+    {name:'Итоговый балл',    val:scores.potential,       color:'#1afe9a'},
   ].map(b=>`
     <div class="bar-row">
       <div class="bar-meta"><span class="name">${b.name}</span><span class="val">${b.val}</span></div>
@@ -805,64 +692,61 @@ function render(address, competitors, scores, finance, aiText) {
 
   // FINANCE
   $('financeBlock').innerHTML = [
-    {label:'Прогноз членов/мес',   val:finance.members+' чел.',        cls:'neutral'},
-    {label:'Средний абонемент',     val:fmtKZT(C.AVG_MEMBERSHIP_KZT),  cls:'neutral'},
-    {label:'Загрузка зала',         val:finance.fillRate+'%',           cls:finance.fillRate>70?'positive':finance.fillRate>40?'neutral':'warn'},
-    {label:'Выручка/мес',           val:fmtKZT(finance.revenue),        cls:'neutral'},
-    {label:'Расходы/мес',           val:fmtKZT(finance.totalCosts),     cls:'neutral'},
-    {label:'Прибыль/мес',           val:fmtKZT(finance.profit),         cls:finance.profit>0?'positive':'warn'},
-    {label:'Маржа',                  val:finance.margin+'%',            cls:finance.margin>25?'positive':finance.margin>10?'neutral':'warn'},
-    {label:'Окупаемость',           val:finance.payback?finance.payback+' лет':'убыток', cls:!finance.payback?'warn':+finance.payback<3?'positive':+finance.payback<5?'neutral':'warn'},
+    {label:'Прогноз членов/мес', val:finance.members+' чел.',     cls:'neutral'},
+    {label:'Средний абонемент',  val:fmtMoney(C.AVG_MEMBERSHIP),  cls:'neutral'},
+    {label:'Загрузка зала',      val:finance.fillRate+'%',         cls:finance.fillRate>70?'positive':finance.fillRate>40?'neutral':'warn'},
+    {label:'Выручка/мес',        val:fmtMoney(finance.revenue),    cls:'neutral'},
+    {label:'Расходы/мес',        val:fmtMoney(finance.totalCosts), cls:'neutral'},
+    {label:'Прибыль/мес',        val:fmtMoney(finance.profit),     cls:finance.profit>0?'positive':'warn'},
+    {label:'Маржа',              val:finance.margin+'%',           cls:finance.margin>25?'positive':finance.margin>10?'neutral':'warn'},
+    {label:'Окупаемость',        val:finance.payback?finance.payback+' лет':'убыток', cls:!finance.payback?'warn':+finance.payback<3?'positive':+finance.payback<5?'neutral':'warn'},
   ].map(f=>`
     <div class="fi-item"><span class="fi-label">${f.label}</span><span class="fi-val ${f.cls}">${f.val}</span></div>`).join('');
 
-  // SCENARIOS
   $('scenarioBlock').innerHTML = `
     <div style="font-size:.8rem;color:var(--muted);font-family:var(--mono);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">Сценарии</div>
-    <div class="fi-item"><span class="fi-label">🔴 Пессимистично (−35%)</span><span class="fi-val warn">${fmtKZT(finance.profitPess)}</span></div>
-    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.pessimistic} членов</span><span class="fi-val warn">${fmtKZT(finance.revenuePess)}</span></div>
+    <div class="fi-item"><span class="fi-label">🔴 Пессимистично (−35%)</span><span class="fi-val warn">${fmtMoney(finance.profitPess)}</span></div>
+    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.pessimistic} членов</span><span class="fi-val warn">${fmtMoney(finance.revenuePess)}</span></div>
     <div class="fi-divider"></div>
-    <div class="fi-item"><span class="fi-label">🟡 Базовый</span><span class="fi-val neutral">${fmtKZT(finance.profit)}</span></div>
-    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.members} членов</span><span class="fi-val neutral">${fmtKZT(finance.revenue)}</span></div>
+    <div class="fi-item"><span class="fi-label">🟡 Базовый</span><span class="fi-val neutral">${fmtMoney(finance.profit)}</span></div>
+    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.members} членов</span><span class="fi-val neutral">${fmtMoney(finance.revenue)}</span></div>
     <div class="fi-divider"></div>
-    <div class="fi-item"><span class="fi-label">🟢 Оптимистично (+35%)</span><span class="fi-val positive">${fmtKZT(finance.profitOpt)}</span></div>
-    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.optimistic} членов</span><span class="fi-val positive">${fmtKZT(finance.revenueOpt)}</span></div>
+    <div class="fi-item"><span class="fi-label">🟢 Оптимистично (+35%)</span><span class="fi-val positive">${fmtMoney(finance.profitOpt)}</span></div>
+    <div class="fi-item"><span class="fi-label">&nbsp;&nbsp;&nbsp;${finance.optimistic} членов</span><span class="fi-val positive">${fmtMoney(finance.revenueOpt)}</span></div>
     <div style="margin-top:1rem;padding:.65rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.76rem;color:var(--muted);font-family:var(--mono);line-height:1.5">
-      Инвестиции: ${fmtKZT(C.INVESTMENT_KZT)}<br>
-      Постоянные расходы: ${fmtKZT(C.FIXED_COSTS_KZT)}/мес<br>
+      Инвестиции: ${fmtMoney(C.INVESTMENT)}<br>
+      Постоянные расходы: ${fmtMoney(C.FIXED_COSTS)}/мес<br>
       Вместимость: ${C.CLASSES_PER_DAY}×${C.MAX_PER_CLASS} чел/день
     </div>`;
 
-  // AI
-  if(aiText){
-    $('aiSummary').innerHTML=`<div class="ai-points">${aiText.split('\n').filter(l=>l.trim()).map(l=>`<div class="ai-point">${l.trim()}</div>`).join('')}</div>`;
-  }
-
   // COMPETITORS
   $('compLabel').textContent = `Найденные конкуренты в радиусе 5 км (${competitors.length})`;
-  const DIRECT_KW = ['женск','ladies','girls','пилатес','йога','растяжк','стретч','танц'];
+  const DIRECT_KW = ['женск','ladies','girls','пилатес','йога','растяжк','стретч','танц','pilates','yoga','dancing'];
   $('competitorList').innerHTML = competitors.length
     ? competitors.map((c,i)=>{
-        const isDirect = DIRECT_KW.some(k=>(c.name+c.rubrics.join(' ')).toLowerCase().includes(k));
+        const isDirect = DIRECT_KW.some(k=>(c.name+' '+c.rubrics.join(' ')).toLowerCase().includes(k));
         const distCls  = c.distance<400?'near':c.distance<900?'mid':'far';
         const threat   = isDirect
           ? `<span class="comp-threat badge-red">прямой конкурент</span>`
           : `<span class="comp-threat badge-muted">косвенный</span>`;
+        const hours = c.openingHours
+          ? `<span class="comp-hours">${c.openingHours}</span>`
+          : '';
         return `<div class="comp-card">
           <span class="comp-rank">${String(i+1).padStart(2,'0')}</span>
           <div class="comp-info">
             <span class="comp-name">${c.name}</span>
             <span class="comp-type">${c.rubrics.slice(0,2).join(' · ')||'—'}</span>
             ${threat}
+            ${hours}
           </div>
           <div class="comp-right">
-            <span class="comp-stars">${c.rating?'★ '+c.rating:'<span style="color:var(--muted)">нет рейт.</span>'}</span>
-            <span class="comp-reviews">${c.reviews?c.reviews+' отз.':'—'}</span>
             <span class="comp-dist ${distCls}">${c.distance}м</span>
+            ${c.address!=='—'?`<span class="comp-hours">${c.address}</span>`:''}
           </div>
         </div>`;
       }).join('')
-    : '<p style="color:var(--muted);font-size:.85rem;padding:1rem 0">Конкуренты не найдены — отличное преимущество первого игрока в районе!</p>';
+    : '<p style="color:var(--muted);font-size:.85rem;padding:1rem 0">Конкуренты не найдены в OpenStreetMap — проверьте другой адрес или это отличное преимущество первого игрока!</p>';
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -890,11 +774,10 @@ async function startAnalysis() {
     const finance = computeFinance(scores);
 
     setStep(5);
-    let aiText = null;
-    try { aiText = await fetchAISummary(geo.address, scores, finance, competitors); } catch(e){}
+    await sleep(400);
 
     hide('loaderSection'); show('resultsSection');
-    render(geo.address, competitors, scores, finance, aiText);
+    render(geo.address, competitors, scores, finance);
 
   } catch(err) {
     hide('loaderSection'); show('heroSection');
