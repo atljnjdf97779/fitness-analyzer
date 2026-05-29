@@ -12,20 +12,34 @@ export default async function handler(req, res) {
     const body = req.body || {};
     const { data } = body;
     if (!data) return res.status(400).json({ error: 'data parameter required' });
-    try {
-      const response = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'fitness-analyzer/1.0',
-        },
-        body: 'data=' + encodeURIComponent(data),
-      });
-      const json = await response.json();
-      return res.status(response.status).json(json);
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
+
+    // Три резервных сервера — если один перегружен, пробуем следующий
+    const SERVERS = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://overpass.openstreetmap.fr/api/interpreter',
+    ];
+
+    for (const server of SERVERS) {
+      try {
+        const response = await fetch(server, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'fitness-analyzer/1.0',
+          },
+          body: 'data=' + encodeURIComponent(data),
+        });
+        if (response.ok) {
+          const json = await response.json();
+          return res.status(200).json(json);
+        }
+      } catch (err) {
+        // сервер недоступен — пробуем следующий
+      }
     }
+
+    return res.status(500).json({ error: 'Серверы карт временно перегружены. Подождите 30 секунд и попробуйте снова.' });
   }
 
   // GET → Nominatim (геокодинг адреса → координаты)
